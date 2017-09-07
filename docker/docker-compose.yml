@@ -1,13 +1,13 @@
 version: '3.2'
 
 services:
-    notifications-onscreen-mongodb:
+    notifications-mongodb:
         image: mongo:latest
         expose:
             - "27017"
         volumes:
             - type: volume
-              source: notifications_onscreen_db
+              source: notifications_db
               target: /data/db
 
     oms-notification-onscreen:
@@ -19,7 +19,7 @@ services:
         expose:
             - "8003"
         depends_on:
-            - notifications-onscreen-mongodb
+            - notifications-mongodb
         labels:
             - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-notification-onscreen/api;PathPrefixStrip:/services/oms-notification-onscreen/api"
             - "traefik.frontend.priority=101"
@@ -31,7 +31,7 @@ services:
 
 
 volumes:
-    notifications_onscreen_db:
+    notifications_db:
         driver: "local"
 
 networks:

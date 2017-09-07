@@ -4,5 +4,6 @@
   "port": 8003,
   "auth_caching": true,
   "auth_cache_expiration": 60000,
-  "notifications_max_age": 432000
+  "notifications_max_age": 432000,
+  "mongo_url": "mongodb://notifications-mongodb/oms-notification-onscreen"
 }
