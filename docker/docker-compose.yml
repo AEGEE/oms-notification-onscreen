@@ -1,0 +1,40 @@
+version: '3.2'
+
+services:
+    notifications-onscreen-mongodb:
+        image: mongo:latest
+        expose:
+            - "27017"
+        volumes:
+            - type: volume
+              source: notifications_onscreen_db
+              target: /data/db
+
+    oms-notification-onscreen:
+        build:
+            context: ./$PATH_OMS_NOTIFICATION_ONSCREEN/oms-notification-onscreen
+            dockerfile: ./Dockerfile.dev
+        volumes:
+            - "./$PATH_OMS_NOTIFICATION_ONSCREEN/../:/usr/app/src"
+        expose:
+            - "8003"
+        depends_on:
+            - notifications-onscreen-mongodb
+        labels:
+            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-notification-onscreen/api;PathPrefixStrip:/services/oms-notification-onscreen/api"
+            - "traefik.frontend.priority=101"
+            - "traefik.port=8003"
+            - "traefik.backend=oms-notification-onscreen"
+            - "traefik.enable=true"
+            - "registry.status=/status"
+            - "registry.categories=(notifications, 10)"
+
+
+volumes:
+    notifications_onscreen_db:
+        driver: "local"
+
+networks:
+  default:
+    external:
+      name: OMS
