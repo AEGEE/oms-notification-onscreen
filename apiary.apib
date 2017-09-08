@@ -1,0 +1,124 @@
+FORMAT: 1A
+HOST: http://polls.apiblueprint.org/
+
+# oms-notification-onscreen
+
+Onscreen is a simple notification provider for onscreen notifications which are kept in a db and returned upon get request. Additionally you can mark some as read.
+
+## Cast a notification [POST /cast]
+
+Saves a notification in the internal db so it can be fetched. Only audience type users is supported, translation will be done by the cast service.
+
++ Attributes
+    + audience_type (required, enum) - To which type of audience do you want to send this. The actual audience will be determined by translating the audience-params to user-ids.
+        - user (string) - Use when you want to directly address one or more users
+    + audience_params: '1', '2', '3' (required, array) - The parameter for the above type of audience. Will be used to determine the actual users audience. E.g. if you specified bodies as audience type then this should an array of body ids. Invalid ids will be ignored.
+    + service: 'oms events' (required, string) - The service that sent the notification. Will be used to group notification settings
+    + category: 'event.new' (required, string) - A category of notification. All notifications which were fired by the same type of event should have the same category so the user can disable that category in his notification settings.
+    + category_name: 'New events' (required, string) - A prettier version of the above for display to the user
+    + time: '2017-09-05T15:46:09.449' (required, string) - When was the notification created
+    + heading: 'New event in your local!' (required, string) - A short description of the event
+    + heading_link: 'app.events.single' (optional, string) - The ui router state that the notification should link to
+    + heading_link_params (optional, object) - Parameters that will be passed to ui-routers state.go
+    + heading_url: 'http://www.google.de' (optional, string) - If you didn't pass a heading link, you can pass an url instead which can lead anywhere. If you did pass both a link and an url, the url will be ignored. If you want to point towards an external site you have to include the http:// preamble, otherwise the link will be appended to the base url
+    + body: 'long long text' (required, string) - A text describing in detail what the notification is about. Still be concise here.
+
++ Request (application/json)
+
+    + Headers
+    
+            X-Auth-Token: User authorization token, for example: fe6bc850-4ace-11e7-9f33-8b694e51753b
+
+    + Body
+
+            {
+                "audience_type": "user",
+                "audience_params": ["1", "2", "3"],
+                "service": "oms-events",
+                "category": "event.new",
+                "category_name": "New events",
+                "time": "2017-09-05T15:46:09.449",
+                "heading": "New event in your local!",
+                "heading_link": "app.events.single",
+                "heading_link_params": {
+                    "id": "DevelopYourself4"
+                },
+                "body": "blablabla..."
+            }
+
++ Response 201 (application/json)
+
+        {
+            "success": true
+        }
+        
+## Get all notifications [GET /notifications]
+
+Per default this endpoint returns all notifications from the past 5 days, sorted by dispatch time. This period can currently not be changed.
+
++ Request (application/json)
+
+    + Headers
+    
+            X-Auth-Token: User authorization token, for example: fe6bc850-4ace-11e7-9f33-8b694e51753b
+
++ Response 200 (application/json)
+
+        {
+           "success":true,
+           "data":[
+              {
+                 "user_id":"1",
+                 "service":"manual-notification",
+                 "category":"some.category",
+                 "category_name":"Some notification category",
+                 "time":"2017-09-08T15:14:26.112Z",
+                 "heading":"Notifications ahoj",
+                 "heading_url":"",
+                 "body":"Notifications are now available in the system!",
+                 "read":false,
+                 "created_at":"2017-09-08T15:14:28.112Z",
+                 "id":"59b2b3d459dcc70027cefe8e"
+              }
+           ]
+        }
+        
+## Mark one notification as read [PUT /notifications/{id}]
+
+Mark one notification as read or unread. You can only modify the read field of a notification.
+
++ Parameters
+    - id: 59b2b3d459dcc70027cefe8e (string) - The id field of the notification that you want to mark as read
+    
++ Request (application/json)
+
+    + Headers
+    
+            X-Auth-Token: User authorization token, for example: fe6bc850-4ace-11e7-9f33-8b694e51753b
+
+    + Body
+    
+            {
+                "read": true
+            }
+        
++ Response 200 (application/json)
+
+        {
+           "success":true,
+           "data":[
+              {
+                 "user_id":"1",
+                 "service":"manual-notification",
+                 "category":"some.category",
+                 "category_name":"Some notification category",
+                 "time":"2017-09-08T15:14:26.112Z",
+                 "heading":"Notifications ahoj",
+                 "heading_url":"",
+                 "body":"Notifications are now available in the system!",
+                 "read":false,
+                 "created_at":"2017-09-08T15:14:28.112Z",
+                 "id":"59b2b3d459dcc70027cefe8e"
+              }
+           ]
+        }
